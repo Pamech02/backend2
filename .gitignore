@@ -1,0 +1,17 @@
+# node modules
+node_modules/
+
+# lock file (solo si decides ignorarlo)
+package-lock.json
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv
+.env
+
+# sistema operativo
+.DS_Store
+Thumbs.db
