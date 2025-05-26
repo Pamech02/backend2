@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const Task = require('../models/Task');
+const Goal = require('../models/Goal');
 const API_KEY = '12345-mi-apikey-secreta';
 
 function authMiddleware(req, res, next) {
@@ -28,61 +30,53 @@ let goals = [
 
 router.use(authMiddleware);
 
-router.get('/getTasks', (req, res) => {
-  res.json(tasks);
+router.get('/getTasks', async (req, res) => {
+  const tasks = await Task.find();
+  res.status(200).json(tasks);
 });
 
-router.get('/getGoals', (req, res) => {
-  res.json(goals);
+router.get('/getGoals', async (req, res) => {
+  const goals = await Goal.find();
+  res.status(200).json(goals);
 });
 
-router.post('/addTask', (req, res) => {
+router.post('/addTask', async (req, res) => {
   const { nombre } = req.body;
-  if (!nombre || typeof nombre !== 'string') {
-    return res.status(400).json({ error: 'Parámetro "nombre" inválido' });
-  }
+  if (!nombre) return res.status(400).json({ error: 'Falta el nombre' });
 
-  const nueva = { id: Date.now(), nombre };
-  tasks.push(nueva);
-  res.status(200).json({ mensaje: 'Tarea agregada', tarea: nueva });
+  const nueva = new Task({ nombre });
+  await nueva.save();
+  res.status(200).json({ mensaje: 'Tarea guardada', tarea: nueva });
 });
 
-router.post('/addGoal', (req, res) => {
+router.post('/addGoal', async (req, res) => {
   const { nombre } = req.body;
    if (!nombre || typeof nombre !== 'string') {
     return res.status(400).json({ error: 'Parámetro "nombre" inválido' });
   }
-  const nueva = { id: Date.now(), nombre };
-  goals.push(nueva);
-  res.status(200).json({ mensaje: 'Tarea agregada', tarea: nueva });
+  const nueva = new Goal({ nombre });
+  await nueva.save();
+  res.status(200).json({ mensaje: 'Goasl agregado', tarea: nueva });
 });
 
-router.delete('/removeTask', (req, res) => {
+router.delete('/removeTask', async (req, res) => {
   const { id } = req.body;
-  if (typeof id !== 'number') {
-    return res.status(400).json({ error: 'Parámetro "id" inválido' });
-  }
+  if (!id) return res.status(400).json({ error: 'Falta el ID' });
 
-  const existe = tasks.some(t => t.id === id);
-  if (!existe) {
-    return res.status(400).json({ error: 'No existe una tarea con ese ID' });
-  }
+  const deleted = await Task.findByIdAndDelete(id);
+  if (!deleted) return res.status(400).json({ error: 'No se encontró esa tarea' });
 
-  tasks = tasks.filter(t => t.id !== id);
   res.status(200).json({ mensaje: `Tarea con ID ${id} eliminada` });
 });
 
-router.delete('/removeGoal', (req, res) => {
+router.delete('/removeGoal', async (req, res) => {
   const { id } = req.body;
-   if (typeof id !== 'number') {
-    return res.status(400).json({ error: 'Parámetro "id" inválido' });
-  }
-  const existe = goals.some(t => t.id === id);
-   if (!existe) {
-    return res.status(400).json({ error: 'No existe una tarea con ese ID' });
-  }
-  goals = goals.filter(g => g.id !== id);
-  res.status(200).json({ mensaje: `Meta con ID ${id} eliminada` });
+  if (!id) return res.status(400).json({ error: 'Falta el ID' });
+
+  const deleted = await Goal.findByIdAndDelete(id);
+  if (!deleted) return res.status(400).json({ error: 'No se encontró esa tarea' });
+
+  res.status(200).json({ mensaje: `Tarea con ID ${id} eliminada` });
 });
 
 module.exports = router;
