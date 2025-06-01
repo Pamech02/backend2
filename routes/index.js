@@ -41,20 +41,20 @@ router.get('/getGoals', async (req, res) => {
 });
 
 router.post('/addTask', async (req, res) => {
-  const { nombre } = req.body;
+  const { nombre, description, dueDate } = req.body;
   if (!nombre) return res.status(400).json({ error: 'Falta el nombre' });
 
-  const nueva = new Task({ nombre });
+  const nueva = new Task({ nombre, description, dueDate });
   await nueva.save();
   res.status(200).json({ mensaje: 'Tarea guardada', tarea: nueva });
 });
 
 router.post('/addGoal', async (req, res) => {
-  const { nombre } = req.body;
+  const { nombre, description, dueDate } = req.body;
    if (!nombre || typeof nombre !== 'string') {
     return res.status(400).json({ error: 'Parámetro "nombre" inválido' });
   }
-  const nueva = new Goal({ nombre });
+  const nueva = new Goal({ nombre, description, dueDate });
   await nueva.save();
   res.status(200).json({ mensaje: 'Goasl agregado', tarea: nueva });
 });
